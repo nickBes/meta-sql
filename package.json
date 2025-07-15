@@ -25,7 +25,12 @@
     "apps/*",
     "packages/*"
   ],
-  "keywords": ["sql", "metadata", "database", "query-analysis"],
+  "keywords": [
+    "sql",
+    "metadata",
+    "database",
+    "query-analysis"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/your-username/meta-sql.git"

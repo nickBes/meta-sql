@@ -47,7 +47,7 @@ bun run lint
 ## Core Library Usage
 
 ```typescript
-import { SqlAnalyzer } from '@meta-sql/core';
+import { SqlAnalyzer } from "@meta-sql/core";
 
 const analyzer = new SqlAnalyzer();
 

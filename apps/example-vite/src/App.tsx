@@ -1,23 +1,25 @@
-import { useState } from 'react'
-import { SqlAnalyzer } from '@meta-sql/core'
+import { useState } from "react";
+import { SqlAnalyzer } from "@meta-sql/core";
 
 function App() {
-  const [sqlInput, setSqlInput] = useState('SELECT name, email FROM users WHERE active = 1')
-  const [analysis, setAnalysis] = useState<any>(null)
-  const [error, setError] = useState<string>('')
+  const [sqlInput, setSqlInput] = useState(
+    "SELECT name, email FROM users WHERE active = 1"
+  );
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [error, setError] = useState<string>("");
 
-  const analyzer = new SqlAnalyzer()
+  const analyzer = new SqlAnalyzer();
 
   const handleAnalyze = () => {
     try {
-      setError('')
-      const result = analyzer.analyze(sqlInput)
-      setAnalysis(result)
+      setError("");
+      const result = analyzer.analyze(sqlInput);
+      setAnalysis(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      setAnalysis(null)
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setAnalysis(null);
     }
-  }
+  };
 
   return (
     <div className="app">
@@ -52,7 +54,7 @@ function App() {
         {analysis && (
           <div className="results">
             <h2>Analysis Results</h2>
-            
+
             <div className="result-section">
               <h3>Query Information</h3>
               <div className="info-grid">
@@ -60,8 +62,10 @@ function App() {
                   <strong>Type:</strong> {analysis.query.type}
                 </div>
                 <div className="info-item">
-                  <strong>Complexity:</strong> 
-                  <span className={`complexity ${analysis.estimatedComplexity.toLowerCase()}`}>
+                  <strong>Complexity:</strong>
+                  <span
+                    className={`complexity ${analysis.estimatedComplexity.toLowerCase()}`}
+                  >
                     {analysis.estimatedComplexity}
                   </span>
                 </div>
@@ -72,7 +76,9 @@ function App() {
               <h3>Tables</h3>
               <div className="tags">
                 {analysis.query.tables.map((table: string, index: number) => (
-                  <span key={index} className="tag table-tag">{table}</span>
+                  <span key={index} className="tag table-tag">
+                    {table}
+                  </span>
                 ))}
               </div>
             </div>
@@ -81,27 +87,36 @@ function App() {
               <h3>Columns</h3>
               <div className="tags">
                 {analysis.query.columns.map((column: string, index: number) => (
-                  <span key={index} className="tag column-tag">{column}</span>
+                  <span key={index} className="tag column-tag">
+                    {column}
+                  </span>
                 ))}
               </div>
             </div>
 
-            {analysis.query.conditions && analysis.query.conditions.length > 0 && (
-              <div className="result-section">
-                <h3>Conditions</h3>
-                <div className="conditions">
-                  {analysis.query.conditions.map((condition: string, index: number) => (
-                    <div key={index} className="condition">{condition}</div>
-                  ))}
+            {analysis.query.conditions &&
+              analysis.query.conditions.length > 0 && (
+                <div className="result-section">
+                  <h3>Conditions</h3>
+                  <div className="conditions">
+                    {analysis.query.conditions.map(
+                      (condition: string, index: number) => (
+                        <div key={index} className="condition">
+                          {condition}
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             <div className="result-section">
               <h3>Dependencies</h3>
               <div className="tags">
                 {analysis.dependencies.map((dep: string, index: number) => (
-                  <span key={index} className="tag dependency-tag">{dep}</span>
+                  <span key={index} className="tag dependency-tag">
+                    {dep}
+                  </span>
                 ))}
               </div>
             </div>
@@ -109,7 +124,7 @@ function App() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,5 +1,5 @@
-import { SqlParser } from './parser.js';
-import { SqlQuery, QueryMetadata } from './types.js';
+import { SqlParser } from "./parser.js";
+import { SqlQuery, QueryMetadata } from "./types.js";
 
 /**
  * SQL metadata analyzer for processing queries and extracting insights
@@ -16,12 +16,12 @@ export class SqlAnalyzer {
    */
   analyze(sql: string): QueryMetadata {
     const query = this.parser.parse(sql);
-    
+
     return {
       query,
       dependencies: this.calculateDependencies(query),
       affectedTables: query.tables,
-      estimatedComplexity: this.estimateComplexity(query)
+      estimatedComplexity: this.estimateComplexity(query),
     };
   }
 
@@ -29,7 +29,7 @@ export class SqlAnalyzer {
    * Analyze multiple queries and return batch metadata
    */
   analyzeBatch(queries: string[]): QueryMetadata[] {
-    return queries.map(sql => this.analyze(sql));
+    return queries.map((sql) => this.analyze(sql));
   }
 
   private calculateDependencies(query: SqlQuery): string[] {
@@ -39,21 +39,28 @@ export class SqlAnalyzer {
     return query.tables;
   }
 
-  private estimateComplexity(query: SqlQuery): 'LOW' | 'MEDIUM' | 'HIGH' {
-    let complexity: 'LOW' | 'MEDIUM' | 'HIGH' = 'LOW';
-    
+  private estimateComplexity(query: SqlQuery): "LOW" | "MEDIUM" | "HIGH" {
+    let complexity: "LOW" | "MEDIUM" | "HIGH" = "LOW";
+
     // Basic complexity estimation based on number of tables and conditions
     if (query.tables.length > 3) {
-      complexity = 'HIGH';
-    } else if (query.tables.length > 1 || (query.conditions && query.conditions.length > 2)) {
-      complexity = 'MEDIUM';
+      complexity = "HIGH";
+    } else if (
+      query.tables.length > 1 ||
+      (query.conditions && query.conditions.length > 2)
+    ) {
+      complexity = "MEDIUM";
     }
-    
+
     // Increase complexity for certain query types
-    if (query.type === 'CREATE' || query.type === 'ALTER' || query.type === 'DROP') {
-      complexity = complexity === 'LOW' ? 'MEDIUM' : 'HIGH';
+    if (
+      query.type === "CREATE" ||
+      query.type === "ALTER" ||
+      query.type === "DROP"
+    ) {
+      complexity = complexity === "LOW" ? "MEDIUM" : "HIGH";
     }
-    
+
     return complexity;
   }
 }

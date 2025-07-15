@@ -76,7 +76,7 @@ body {
   border-radius: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   color: white;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 1rem;
   resize: vertical;
   backdrop-filter: blur(5px);
@@ -102,7 +102,9 @@ body {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .analyze-btn:hover {
@@ -220,7 +222,7 @@ body {
 }
 
 .condition {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #fff;
   margin-bottom: 0.5rem;
 }
@@ -233,15 +235,16 @@ body {
   .app {
     padding: 1rem;
   }
-  
+
   .app-header h1 {
     font-size: 2rem;
   }
-  
-  .input-section, .results {
+
+  .input-section,
+  .results {
     padding: 1.5rem;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
   }

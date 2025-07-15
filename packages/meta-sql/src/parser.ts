@@ -1,4 +1,4 @@
-import { SqlQuery, QueryMetadata } from "./types.js";
+import { SqlQuery } from "./types.js";
 
 /**
  * Basic SQL query parser for extracting metadata

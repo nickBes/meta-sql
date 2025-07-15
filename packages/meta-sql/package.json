@@ -1,6 +1,6 @@
 {
   "name": "@meta-sql/core",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Core library for SQL metadata processing",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -32,5 +32,10 @@
     "typescript": "5.8.2"
   },
   "dependencies": {},
-  "keywords": ["sql", "metadata", "parser", "database"]
+  "keywords": [
+    "sql",
+    "metadata",
+    "parser",
+    "database"
+  ]
 }

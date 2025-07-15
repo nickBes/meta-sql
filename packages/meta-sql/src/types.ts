@@ -20,7 +20,7 @@ export interface ForeignKeyRef {
 }
 
 export interface SqlQuery {
-  type: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'CREATE' | 'DROP' | 'ALTER';
+  type: "SELECT" | "INSERT" | "UPDATE" | "DELETE" | "CREATE" | "DROP" | "ALTER";
   tables: string[];
   columns: string[];
   conditions?: string[];
@@ -30,5 +30,5 @@ export interface QueryMetadata {
   query: SqlQuery;
   dependencies: string[];
   affectedTables: string[];
-  estimatedComplexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  estimatedComplexity: "LOW" | "MEDIUM" | "HIGH";
 }

@@ -41,9 +41,9 @@ Try these example SQL queries:
 ```sql
 SELECT name, email FROM users WHERE active = 1
 
-SELECT u.name, p.title 
-FROM users u 
-JOIN posts p ON u.id = p.user_id 
+SELECT u.name, p.title
+FROM users u
+JOIN posts p ON u.id = p.user_id
 WHERE u.active = 1 AND p.published = 1
 
 INSERT INTO users (name, email, active) VALUES ('John Doe', 'john@example.com', 1)
