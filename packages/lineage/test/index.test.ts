@@ -1,49 +1,75 @@
-import { describe, it, expect } from "bun:test";
-import { SqlParser, SqlAnalyzer } from "../src/index";
+import { describe, test, expect } from "bun:test";
+import { Parser } from "node-sql-parser";
+import type { AST, Select } from "node-sql-parser";
+import { getLineage, type Schema, type Table } from "../src/index.js";
 
-describe("SqlParser", () => {
-  const parser = new SqlParser();
+const parser = new Parser();
 
-  it("should parse a simple SELECT query", () => {
-    const sql = "SELECT name, email FROM users WHERE id = 1";
-    const result = parser.parse(sql);
+// Helper function to create schemas
+function createSchema(namespace: string, tables: Table[]): Schema {
+  return { namespace, tables };
+}
 
-    expect(result.type).toBe("SELECT");
-    expect(result.tables).toContain("users");
-    expect(result.columns).toContain("name");
-    expect(result.columns).toContain("email");
-  });
+function createTable(name: string, columns: string[]): Table {
+  return { name, columns };
+}
 
-  it("should parse an INSERT query", () => {
-    const sql = "INSERT INTO users (name, email) VALUES (?, ?)";
-    const result = parser.parse(sql);
+// Helper to ensure we get a single AST
+function parseSQL(sql: string): AST {
+  const result = parser.astify(sql);
+  const ast = Array.isArray(result) ? result[0] : result;
 
-    expect(result.type).toBe("INSERT");
-    expect(result.tables).toContain("users");
-  });
-});
+  if (!ast) {
+    throw new Error("Failed to parse SQL");
+  }
 
-describe("SqlAnalyzer", () => {
-  const analyzer = new SqlAnalyzer();
+  return ast;
+}
 
-  it("should analyze query complexity", () => {
-    const simpleSql = "SELECT * FROM users";
-    const complexSql =
-      "SELECT u.name, p.title FROM users u JOIN posts p ON u.id = p.user_id WHERE u.active = 1 AND p.published = 1";
+describe("Select Lineage", () => {
+  test("select from cte", () => {
+    const sql = `
+    WITH u AS (
+      SELECT 
+        id,
+        name
+      FROM users
+    ) 
+    SELECT 
+      id,
+      name as wow
+    FROM u
+    `;
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("users", ["id", "name", "email"]),
+    ]);
 
-    const simpleResult = analyzer.analyze(simpleSql);
-    const complexResult = analyzer.analyze(complexSql);
+    const lineage = getLineage(ast as Select, schema);
 
-    expect(simpleResult.estimatedComplexity).toBe("LOW");
-    expect(complexResult.estimatedComplexity).toBe("MEDIUM");
-  });
+    expect(lineage).toEqual({
+      id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      wow: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "name",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+    });
 
-  it("should identify dependencies", () => {
-    const sql =
-      "SELECT u.name, p.title FROM users u JOIN posts p ON u.id = p.user_id";
-    const result = analyzer.analyze(sql);
-
-    expect(result.dependencies.length).toBeGreaterThan(0);
-    expect(result.affectedTables).toEqual(result.query.tables);
+    expect.hasAssertions();
   });
 });

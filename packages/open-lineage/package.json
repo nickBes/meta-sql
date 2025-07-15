@@ -1,6 +1,10 @@
 {
   "name": "@meta-sql/open-lineage",
   "module": "index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "version": "0.0.1",
   "peerDependencies": {
     "typescript": "^5"
   },
