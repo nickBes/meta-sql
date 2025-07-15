@@ -17,8 +17,8 @@ This is a Turborepo monorepo containing:
 ### Packages
 
 - **`@meta-sql/core`**: Core TypeScript library for SQL metadata processing
-- **`@repo/eslint-config`**: Shared ESLint configurations
-- **`@repo/typescript-config`**: Shared TypeScript configurations
+- **`@meta-sql/eslint-config`**: Shared ESLint configurations
+- **`@meta-sql/typescript-config`**: Shared TypeScript configurations
 
 ### Applications
 

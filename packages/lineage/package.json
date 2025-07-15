@@ -1,7 +1,7 @@
 {
-  "name": "@meta-sql/core",
+  "name": "@meta-sql/lineage",
   "version": "0.0.1",
-  "description": "Core library for SQL metadata processing",
+  "description": "Library for processing lineage from SQL",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -24,8 +24,8 @@
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "@repo/eslint-config": "*",
-    "@repo/typescript-config": "*",
+    "@meta-sql/eslint-config": "workspace:*",
+    "@meta-sql/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "eslint": "^9.30.0",
     "tsup": "^8.0.2",
@@ -34,7 +34,7 @@
   "dependencies": {},
   "keywords": [
     "sql",
-    "metadata",
+    "lineage",
     "parser",
     "database"
   ]
