@@ -69,7 +69,45 @@ describe("Select Lineage", () => {
         ],
       },
     });
+  });
 
-    expect.hasAssertions();
+  test("select from cte with *", () => {
+    const sql = `
+                WITH u AS (
+                  SELECT * FROM users
+                )
+                SELECT 
+                  id,
+                  name as wow
+                FROM (SELECT * FROM u) AS t`;
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("users", ["id", "name", "email"]),
+    ]);
+
+    const lineage = getLineage(ast as Select, schema);
+
+    expect(lineage).toEqual({
+      id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      wow: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "name",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+    });
   });
 });

@@ -20,14 +20,17 @@ export type Schema = {
   tables: Table[];
 };
 
-export function isColumn(value: Select["columns"][number]): value is AstColumn {
+
+export function isColumn(
+  selectColumn: Select["columns"][number]
+): selectColumn is AstColumn {
   return (
-    typeof value === "object" &&
-    value !== null &&
-    "as" in value &&
-    "expr" in value &&
-    typeof value.expr === "object" &&
-    value.expr !== null
+    typeof selectColumn === "object" &&
+    selectColumn !== null &&
+    "as" in selectColumn &&
+    "expr" in selectColumn &&
+    typeof selectColumn.expr === "object" &&
+    selectColumn.expr !== null
   );
 }
 
@@ -115,23 +118,13 @@ export function getColumnLineage(
         },
       ];
     } else {
+      const inputFields = [];
+
       for (const selectTable of selectTables) {
-        const matchingColumn: AstColumn | undefined = selectTable.columns.find(
-          (c) => isColumn(c) && getOutputColumnName(c) === inputColumnName
-        );
-
-        if (matchingColumn) {
-          const inputFields = getColumnLineage(
-            selectTable,
-            schema,
-            matchingColumn
-          );
-
-          if (inputFields.length > 0) {
-            return inputFields;
-          }
-        }
+        inputFields.push(...getColumnLineage(selectTable, schema, column));
       }
+
+      return inputFields;
     }
   }
 
