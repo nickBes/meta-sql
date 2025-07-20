@@ -20,7 +20,6 @@ export type Schema = {
   tables: Table[];
 };
 
-
 export function isColumn(
   selectColumn: Select["columns"][number]
 ): selectColumn is AstColumn {
@@ -121,7 +120,13 @@ export function getColumnLineage(
       const inputFields = [];
 
       for (const selectTable of selectTables) {
-        inputFields.push(...getColumnLineage(selectTable, schema, column));
+        const matchingColumn = selectTable.columns.find(
+          (c) => getOutputColumnName(c) === inputColumnName
+        );
+
+        inputFields.push(
+          ...getColumnLineage(selectTable, schema, matchingColumn ?? column)
+        );
       }
 
       return inputFields;

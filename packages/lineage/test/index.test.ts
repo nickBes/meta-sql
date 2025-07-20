@@ -110,4 +110,49 @@ describe("Select Lineage", () => {
       },
     });
   });
+
+  test("select with lots of aliases", () => {
+    const sql = `
+    WITH u AS (
+      SELECT 
+        id as i,
+        name as n
+      FROM users
+    ) 
+    SELECT 
+      i as id,
+      n as wow
+    FROM u
+    `;
+
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("users", ["id", "name", "email"]),
+    ]);
+
+    const lineage = getLineage(ast as Select, schema);
+
+    expect(lineage).toEqual({
+      id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      wow: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "name",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+    });
+  });
 });
