@@ -155,4 +155,42 @@ describe("Select Lineage", () => {
       },
     });
   });
+
+  test("select with group by", () => {
+    const sql = `SELECT country, COUNT(city) as city_count
+      FROM cities
+      GROUP BY country`;
+
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("cities", ["country", "city"]),
+    ]);
+
+    const lineage = getLineage(ast as Select, schema);
+
+    expect(lineage).toEqual({
+      country: {
+        inputFields: [
+          {
+            name: "cities",
+            namespace: "trino",
+            field: "country",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      city_count: {
+        inputFields: [
+          {
+            name: "cities",
+            namespace: "trino",
+            field: "city",
+            transformations: [
+              { type: "DIRECT", subtype: "AGGREGATION", masking: true },
+            ],
+          },
+        ],
+      },
+    });
+  });
 });
