@@ -9,17 +9,7 @@
  * @see https://openlineage.io/docs/spec/facets/dataset-facets/column_lineage_facet/
  */
 
-/**
- * Base interface for all OpenLineage dataset facets
- */
-export interface DatasetFacet {
-  /** Producer URI identifying the system that emitted this facet */
-  _producer?: string;
-  /** Schema URL for this facet */
-  _schemaURL?: string;
-  /** Whether this facet represents a deleted entity */
-  _deleted?: boolean;
-}
+import { DatasetFacet } from "../events.js";
 
 /**
  * Transformation type indicating how direct the relationship is between input and output

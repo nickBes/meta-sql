@@ -1,7 +1,11 @@
 /**
- * @meta-sql/open-lineage
+ * OpenLineage TypeScript Types
  *
- * TypeScript types for OpenLineage facets
+ * Complete OpenLineage specification types for events and facets.
  */
 
+// Events
+export * from "./events.js";
+
+// Facets
 export * from "./facets/index.js";

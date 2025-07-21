@@ -1,0 +1,29 @@
+{
+  "name": "@meta-sql/datahub-example",
+  "version": "0.0.1",
+  "description": "Example application demonstrating DataHub OpenLineage integration with meta-sql packages",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@meta-sql/lineage": "workspace:*",
+    "@meta-sql/open-lineage": "workspace:*",
+    "node-sql-parser": "^5.3.10"
+  },
+  "devDependencies": {
+    "@meta-sql/eslint-config": "workspace:*",
+    "@meta-sql/typescript-config": "workspace:*",
+    "eslint": "^9.30.0",
+    "typescript": "5.8.2"
+  },
+  "keywords": [
+    "datahub",
+    "openlineage",
+    "sql",
+    "lineage",
+    "example"
+  ]
+}
