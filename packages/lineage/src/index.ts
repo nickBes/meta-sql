@@ -1,10 +1,48 @@
-import { ColumnLineageDatasetFacet, InputField } from "@meta-sql/open-lineage";
+import {
+  ColumnLineageDatasetFacet,
+  InputField,
+  Transformation,
+} from "@meta-sql/open-lineage";
 import {
   Select,
   Column as AstColumn,
   ColumnRefItem,
   BaseFrom,
+  Binary,
+  ExpressionValue,
+  AggrFunc,
 } from "node-sql-parser";
+import { HashSet } from "./hashset";
+
+const MASKING_AGG_FUNCTIONS = new Set(["COUNT"]);
+
+const DIRECT_TRANSFORMATION: Transformation = {
+  type: "DIRECT",
+  subtype: "TRANSFORMATION",
+};
+
+const DIRECT_IDENTITY: Transformation = {
+  type: "DIRECT",
+  subtype: "IDENTITY",
+};
+
+const DIRECT_AGGREGATION: Transformation = {
+  type: "DIRECT",
+  subtype: "AGGREGATION",
+};
+
+class TransformationSet extends HashSet<Transformation> {
+  constructor(values?: readonly Transformation[]) {
+    super(
+      (value: Transformation) =>
+        `${value.type}-${value.subtype}-${value.masking ? "MASKED" : "UNMASKED"}`
+    );
+
+    if (values) {
+      values.forEach((value) => this.add(value));
+    }
+  }
+}
 
 export type Column = {
   name: string;
@@ -51,6 +89,69 @@ export function getOutputColumnName(column: AstColumn): string | null {
   return null;
 }
 
+export function getDirectTransformationsFromExprValue(
+  expr: ExpressionValue,
+  override?: Transformation
+): Record<string, TransformationSet> {
+  switch (expr.type) {
+    case "column_ref": {
+      const inputColumnName = getInputColumnName(expr as ColumnRefItem);
+
+      return inputColumnName
+        ? {
+            [inputColumnName]: new TransformationSet([
+              override ?? DIRECT_IDENTITY,
+            ]),
+          }
+        : {};
+    }
+    case "binary_expr": {
+      const { left, right } = expr as Binary;
+
+      const merged: Record<string, TransformationSet> = {};
+
+      Object.entries(
+        getDirectTransformationsFromExprValue(
+          left,
+          override ?? DIRECT_TRANSFORMATION
+        )
+      ).forEach(([key, value]) => {
+        merged[key] = value;
+      });
+
+      Object.entries(
+        getDirectTransformationsFromExprValue(
+          right,
+          override ?? DIRECT_TRANSFORMATION
+        )
+      ).forEach(([key, value]) => {
+        const prev = merged[key];
+
+        if (prev) {
+          merged[key] = prev.intersection(value);
+        } else {
+          merged[key] = value;
+        }
+      });
+
+      return merged;
+    }
+    case "aggr_func": {
+      const aggExpr = expr as AggrFunc;
+
+      return getDirectTransformationsFromExprValue(
+        aggExpr.args.expr,
+        override ?? {
+          ...DIRECT_AGGREGATION,
+          masking: MASKING_AGG_FUNCTIONS.has(aggExpr.name),
+        }
+      );
+    }
+    default:
+      return {};
+  }
+}
+
 export function getTableExpressionsFromSelect(select: Select): {
   regularTables: BaseFrom[];
   selectTables: Select[];
@@ -84,17 +185,15 @@ export function getColumnLineage(
   schema: Schema,
   column: AstColumn
 ): InputField[] {
-  if (column.expr.type === "column_ref") {
-    const columnItemRef = column.expr as ColumnRefItem;
-    const inputColumnName = getInputColumnName(columnItemRef);
+  const transformationsByColumns = getDirectTransformationsFromExprValue(
+    column.expr
+  );
 
-    if (!inputColumnName) {
-      return [];
-    }
+  const { regularTables, selectTables } = getTableExpressionsFromSelect(select);
 
-    const { regularTables, selectTables } =
-      getTableExpressionsFromSelect(select);
-
+  for (const [inputColumnName, transformations] of Object.entries(
+    transformationsByColumns
+  )) {
     const table = regularTables.find((t) =>
       schema.tables.some(
         (s) =>
@@ -108,12 +207,7 @@ export function getColumnLineage(
           namespace: schema.namespace,
           name: table.table,
           field: inputColumnName,
-          transformations: [
-            {
-              type: "DIRECT",
-              subtype: "IDENTITY",
-            },
-          ],
+          transformations: Array.from(transformations),
         },
       ];
     } else {

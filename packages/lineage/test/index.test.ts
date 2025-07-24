@@ -16,7 +16,7 @@ function createTable(name: string, columns: string[]): Table {
 
 // Helper to ensure we get a single AST
 function parseSQL(sql: string): AST {
-  const result = parser.astify(sql);
+  const result = parser.astify(sql, { database: "trino" });
   const ast = Array.isArray(result) ? result[0] : result;
 
   if (!ast) {
@@ -157,7 +157,7 @@ describe("Select Lineage", () => {
   });
 
   test("select with group by", () => {
-    const sql = `SELECT country, COUNT(city) as city_count
+    const sql = `SELECT country, count(city) as city_count
       FROM cities
       GROUP BY country`;
 
@@ -188,6 +188,51 @@ describe("Select Lineage", () => {
             transformations: [
               { type: "DIRECT", subtype: "AGGREGATION", masking: true },
             ],
+          },
+        ],
+      },
+    });
+  });
+
+  test("select with binary expression", () => {
+    const sql = `SELECT id, name, id + 1 as next_id
+      FROM users`;
+
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("users", ["id", "name"]),
+    ]);
+
+    const lineage = getLineage(ast as Select, schema);
+
+    expect(lineage).toEqual({
+      id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      name: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "name",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      next_id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "TRANSFORMATION" }],
           },
         ],
       },

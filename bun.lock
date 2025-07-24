@@ -10,6 +10,21 @@
         "typescript": "5.8.3",
       },
     },
+    "apps/datahub-example": {
+      "name": "@meta-sql/datahub-example",
+      "version": "0.0.1",
+      "dependencies": {
+        "@meta-sql/lineage": "workspace:*",
+        "@meta-sql/open-lineage": "workspace:*",
+        "node-sql-parser": "^5.3.10",
+      },
+      "devDependencies": {
+        "@meta-sql/eslint-config": "workspace:*",
+        "@meta-sql/typescript-config": "workspace:*",
+        "eslint": "^9.30.0",
+        "typescript": "5.8.2",
+      },
+    },
     "packages/eslint-config": {
       "name": "@meta-sql/eslint-config",
       "version": "0.0.0",
@@ -145,6 +160,8 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.4", "", {}, "sha512-VT2+G1VQs/9oz078bLrYbecdZKs912zQlkelYpuf+SXF+QvZDYJlbx/LSx+meSAwdDFnF8FVXW92AVjjkVmgFw=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.29", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ=="],
+
+    "@meta-sql/datahub-example": ["@meta-sql/datahub-example@workspace:apps/datahub-example"],
 
     "@meta-sql/eslint-config": ["@meta-sql/eslint-config@workspace:packages/eslint-config"],
 
@@ -797,6 +814,8 @@
     "@eslint/eslintrc/globals": ["globals@14.0.0", "", {}, "sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ=="],
 
     "@humanfs/node/@humanwhocodes/retry": ["@humanwhocodes/retry@0.3.1", "", {}, "sha512-JBxkERygn7Bv/GbN5Rv8Ul6LVknS+5Bp6RgDC/O8gEBU/yeH5Ui5C/OlWrTb6qct7LjjfT6Re2NxB0ln0yYybA=="],
+
+    "@meta-sql/datahub-example/typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
 
     "@meta-sql/lineage/typescript": ["typescript@5.8.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ=="],
 
