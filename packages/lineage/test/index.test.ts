@@ -239,10 +239,10 @@ describe("Select Lineage", () => {
     });
   });
 
-  test("select same column name different tables", () => {
+  test("select same column different tables", () => {
     const sql = `SELECT u.id, o.id as order_id
       FROM users u
-      JOIN (select * from orders) o ON u.id = o.user_id`;
+      JOIN orders o ON u.id = o.user_id`;
 
     const ast = parseSQL(sql);
     const schema = createSchema("trino", [

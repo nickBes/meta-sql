@@ -243,17 +243,24 @@ export function getColumnLineage(
       const inputFields = [];
 
       for (const selectTable of selectTables) {
-        if (inputColumn.table && selectTable.as !== inputColumn.table) {
+        if (inputColumn.table && inputColumn.table !== selectTable.as) {
           continue;
         }
 
         const matchingColumn = selectTable.columns.find(
-          (c) => getOutputColumnName(c) === inputColumnName
+          (c) => getOutputColumnName(c) === inputColumn.name
         );
 
-        inputFields.push(
-          ...getColumnLineage(selectTable, schema, matchingColumn ?? column)
-        );
+        const nextColumn = matchingColumn ?? column;
+
+        // stop propogating table of column as it is only in the context of the select
+        if (nextColumn.expr.type === "column_ref") {
+          const expr = nextColumn.expr as ColumnRefItem;
+
+          expr.table = null;
+        }
+
+        inputFields.push(...getColumnLineage(selectTable, schema, nextColumn));
       }
 
       return inputFields;
