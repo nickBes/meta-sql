@@ -58,6 +58,15 @@ export type Schema = {
   tables: Table[];
 };
 
+export type InputColumn = {
+  name: string;
+  table?: string;
+};
+
+export type SelectWithAlias = Select & {
+  as?: string | null;
+};
+
 export function isColumn(
   selectColumn: Select["columns"][number]
 ): selectColumn is AstColumn {
@@ -69,6 +78,20 @@ export function isColumn(
     typeof selectColumn.expr === "object" &&
     selectColumn.expr !== null
   );
+}
+
+export function formatInputColumnName(column: ColumnRefItem): string {
+  return `${column.table ? `${column.table}.` : ""}${getInputColumnName(
+    column
+  )}`;
+}
+
+export function parseInputColumnName(column: string): InputColumn {
+  const parts = column.split(".");
+  const name = parts.pop() || "";
+  const table = parts.length > 0 ? parts.join(".") : undefined;
+
+  return { name, table };
 }
 
 export function getInputColumnName(column: ColumnRefItem): string | null {
@@ -95,7 +118,7 @@ export function getDirectTransformationsFromExprValue(
 ): Record<string, TransformationSet> {
   switch (expr.type) {
     case "column_ref": {
-      const inputColumnName = getInputColumnName(expr as ColumnRefItem);
+      const inputColumnName = formatInputColumnName(expr as ColumnRefItem);
 
       return inputColumnName
         ? {
@@ -154,10 +177,10 @@ export function getDirectTransformationsFromExprValue(
 
 export function getTableExpressionsFromSelect(select: Select): {
   regularTables: BaseFrom[];
-  selectTables: Select[];
+  selectTables: SelectWithAlias[];
 } {
   const regularTables: BaseFrom[] = [];
-  const selectTables: Select[] = [];
+  const selectTables: SelectWithAlias[] = [];
 
   if (select.from) {
     const fromItems = Array.isArray(select.from) ? select.from : [select.from];
@@ -166,14 +189,14 @@ export function getTableExpressionsFromSelect(select: Select): {
       if ("table" in item) {
         regularTables.push(item);
       } else if ("expr" in item) {
-        selectTables.push(item.expr.ast);
+        selectTables.push({ ...item.expr.ast, as: item.as });
       }
     });
   }
 
   if (select.with) {
     select.with.forEach((withItem) => {
-      selectTables.push(withItem.stmt.ast);
+      selectTables.push({ ...withItem.stmt.ast, as: withItem.name.value });
     });
   }
 
@@ -194,11 +217,17 @@ export function getColumnLineage(
   for (const [inputColumnName, transformations] of Object.entries(
     transformationsByColumns
   )) {
-    const table = regularTables.find((t) =>
-      schema.tables.some(
-        (s) =>
-          s.columns.some((c) => c === inputColumnName) && s.name === t.table
-      )
+    const inputColumn = parseInputColumnName(inputColumnName);
+
+    const table = regularTables.find(
+      (t) =>
+        (!inputColumn.table ||
+          inputColumn.table === t.table ||
+          inputColumn.table === t.as) &&
+        schema.tables.some(
+          (s) =>
+            s.name === t.table && s.columns.some((c) => c === inputColumn.name)
+        )
     );
 
     if (table) {
@@ -206,7 +235,7 @@ export function getColumnLineage(
         {
           namespace: schema.namespace,
           name: table.table,
-          field: inputColumnName,
+          field: inputColumn.name,
           transformations: Array.from(transformations),
         },
       ];
@@ -214,6 +243,10 @@ export function getColumnLineage(
       const inputFields = [];
 
       for (const selectTable of selectTables) {
+        if (inputColumn.table && selectTable.as !== inputColumn.table) {
+          continue;
+        }
+
         const matchingColumn = selectTable.columns.find(
           (c) => getOutputColumnName(c) === inputColumnName
         );
