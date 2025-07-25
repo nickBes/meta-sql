@@ -238,4 +238,41 @@ describe("Select Lineage", () => {
       },
     });
   });
+
+  test("select same column different tables", () => {
+    const sql = `SELECT u.id, o.id as order_id
+      FROM users u
+      JOIN orders o ON u.id = o.user_id`;
+
+    const ast = parseSQL(sql);
+    const schema = createSchema("trino", [
+      createTable("users", ["id", "name", "email"]),
+      createTable("orders", ["id", "user_id", "total"]),
+    ]);
+
+    const lineage = getLineage(ast as Select, schema);
+
+    expect(lineage).toEqual({
+      id: {
+        inputFields: [
+          {
+            name: "users",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+      order_id: {
+        inputFields: [
+          {
+            name: "orders",
+            namespace: "trino",
+            field: "id",
+            transformations: [{ type: "DIRECT", subtype: "IDENTITY" }],
+          },
+        ],
+      },
+    });
+  });
 });
