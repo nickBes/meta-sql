@@ -11,6 +11,7 @@ import {
   Binary,
   ExpressionValue,
   AggrFunc,
+  Function as AstFunction,
 } from "node-sql-parser";
 import { HashSet } from "./hashset";
 
@@ -170,6 +171,27 @@ export function getDirectTransformationsFromExprValue(
         }
       );
     }
+    case "function": {
+      const funcExpr = expr as AstFunction;
+
+      return (
+        funcExpr.args?.value.reduce(
+          (acc, arg) => {
+            const argTransformations = getDirectTransformationsFromExprValue(
+              arg,
+              override ?? DIRECT_TRANSFORMATION
+            );
+
+            Object.entries(argTransformations).forEach(([key, value]) => {
+              acc[key] = acc[key] ? acc[key].intersection(value) : value;
+            });
+
+            return acc;
+          },
+          {} as Record<string, TransformationSet>
+        ) ?? {}
+      );
+    }
     default:
       return {};
   }
@@ -214,6 +236,8 @@ export function getColumnLineage(
 
   const { regularTables, selectTables } = getTableExpressionsFromSelect(select);
 
+  const inputFields: InputField[] = [];
+
   for (const [inputColumnName, transformations] of Object.entries(
     transformationsByColumns
   )) {
@@ -231,17 +255,13 @@ export function getColumnLineage(
     );
 
     if (table) {
-      return [
-        {
-          namespace: schema.namespace,
-          name: table.table,
-          field: inputColumn.name,
-          transformations: Array.from(transformations),
-        },
-      ];
+      inputFields.push({
+        namespace: schema.namespace,
+        name: table.table,
+        field: inputColumn.name,
+        transformations: Array.from(transformations),
+      });
     } else {
-      const inputFields = [];
-
       for (const selectTable of selectTables) {
         if (inputColumn.table && inputColumn.table !== selectTable.as) {
           continue;
@@ -262,12 +282,10 @@ export function getColumnLineage(
 
         inputFields.push(...getColumnLineage(selectTable, schema, nextColumn));
       }
-
-      return inputFields;
     }
   }
 
-  return [];
+  return inputFields;
 }
 
 export function getLineage(

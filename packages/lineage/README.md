@@ -76,13 +76,12 @@ Our development roadmap aligns with the OpenLineage Column Lineage Dataset Facet
 
 ### 🚧 Phase 1: Enhanced Transformations
 
-- [ ] **DIRECT/TRANSFORMATION** support for computed columns
+- ✅ **DIRECT/TRANSFORMATION** support for computed columns
   - ✅ Mathematical operations (`SELECT price * quantity`)
-  - String functions (`SELECT UPPER(name)`)
-  - Date functions (`SELECT DATE_ADD(created_at, INTERVAL 1 DAY)`)
-- [ ] **DIRECT/AGGREGATION** support for aggregation functions
+  - ✅ String functions (`SELECT UPPER(name)`)
+  - ✅ Date functions (`SELECT DATE_ADD(created_at, INTERVAL 1 DAY)`)
+- ✅ **DIRECT/AGGREGATION** support for aggregation functions
   - ✅ Basic aggregations (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`)
-  - GROUP BY clause handling
 - [ ] **Masking detection** for privacy-preserving transformations
   - Hash functions (`SELECT MD5(email)`)
   - Anonymization functions (`SELECT ANONYMIZE(ssn)`)
@@ -104,7 +103,7 @@ Our development roadmap aligns with the OpenLineage Column Lineage Dataset Facet
 - [ ] **INDIRECT/CONDITION** for CASE WHEN and IF statements
 - [ ] **Complex JOIN types** (LEFT, RIGHT, FULL OUTER)
 - [ ] **UNION and INTERSECT** operations
-- [ ] **Recursive CTEs** support
+- ✅ **Recursive CTEs** support
 
 ### 🔧 Phase 4: Enhanced Analysis
 
