@@ -65,11 +65,9 @@ Both packages are designed to work with the [OpenLineage](https://openlineage.io
 ```bash
 # Install specific packages
 npm install @meta-sql/lineage node-sql-parser
-npm install @meta-sql/open-lineage
 
 # Or with bun
 bun add @meta-sql/lineage node-sql-parser
-bun add @meta-sql/open-lineage
 ```
 
 ## Development
