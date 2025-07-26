@@ -1,7 +1,11 @@
 {
   "extends": "@meta-sql/typescript-config/react-app.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "paths": {
+      "@meta-sql/ui": ["../../packages/ui/src"],
+      "@meta-sql/ui/*": ["../../packages/ui/src/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../../packages/ui/src"]
 }
