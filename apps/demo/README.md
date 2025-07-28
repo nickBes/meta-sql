@@ -1,33 +1,73 @@
-# React + TypeScript + Vite
+# Meta-SQL Demo App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive web application demonstrating the capabilities of the Meta-SQL library ecosystem for SQL query analysis and column-level lineage tracking.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive SQL Editor**: Write and test SQL queries with syntax highlighting
+- **Real-time Lineage Visualization**: See column-level data flow in an interactive graph
+- **Multi-dialect Support**: Test queries in MySQL, PostgreSQL, BigQuery, Trino, SQLite, and T-SQL
+- **Schema Integration**: Visualize available tables and columns before writing queries
+- **Transformation Tracking**: See how data transformations affect lineage relationships
+- **Data Masking Detection**: Identify columns with applied data masking
 
-## Expanding the ESLint configuration
+## Live Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+The demo is automatically deployed to GitHub Pages: [https://nickbes.github.io/meta-sql/](https://nickbes.github.io/meta-sql/)
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Local Development
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+To run the demo locally:
 
-      // Other configs...
-    ],
+```bash
+# From the repository root
+bun install
+bun run build
+bun run dev --filter=@meta-sql/demo
+```
+
+Then open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## Sample Queries
+
+The demo includes sample queries for each supported SQL dialect that demonstrate various lineage scenarios:
+
+- **Simple column mapping**: Direct field selection and aliasing
+- **Join operations**: Multi-table relationships and dependencies
+- **Aggregations**: GROUP BY operations and calculated fields
+- **Data transformations**: Functions, calculations, and derived columns
+- **Data masking**: Hash functions and data obfuscation techniques
+
+## Architecture
+
+The demo is built with:
+
+- **React 19** - UI framework
+- **Vite** - Build tool and development server
+- **Monaco Editor** - SQL syntax highlighting and editing
+- **ReactFlow** - Interactive lineage graph visualization
+- **Tailwind CSS** - Styling and responsive design
+- **Meta-SQL packages** - Core lineage extraction and analysis
+
+## Deployment
+
+The demo is automatically deployed to GitHub Pages using GitHub Actions when changes are pushed to the main branch. The deployment workflow:
+
+1. Builds all Meta-SQL packages
+2. Builds the demo app with proper base path for GitHub Pages
+3. Deploys the static assets to GitHub Pages
+
+## Contributing
+
+To contribute to the demo:
+
+1. Make changes to the demo app in `apps/demo/`
+2. Test locally with `bun run dev --filter=@meta-sql/demo`
+3. Create a pull request - the demo will be automatically deployed when merged
+
+## License
+
+MIT License - see [LICENSE](../../LICENSE) for details.
     languageOptions: {
       parserOptions: {
         project: ['./tsconfig.node.json', './tsconfig.app.json'],

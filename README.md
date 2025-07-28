@@ -2,6 +2,16 @@
 
 A TypeScript library ecosystem for processing SQL queries and extracting metadata, with a focus on column-level lineage tracking compatible with OpenLineage standards.
 
+## 🚀 Interactive Demo
+
+Try the live demo: **[https://nickbes.github.io/meta-sql/](https://nickbes.github.io/meta-sql/)**
+
+The demo showcases:
+- Real-time SQL query parsing and lineage extraction
+- Interactive column-level lineage visualization
+- Support for multiple SQL dialects (MySQL, PostgreSQL, BigQuery, etc.)
+- Data masking and transformation tracking
+
 ## Overview
 
 Meta-SQL provides tools for analyzing SQL queries to understand data lineage and dependencies. The project consists of modular packages that work together to parse SQL, extract column relationships, and generate metadata that follows industry standards.
