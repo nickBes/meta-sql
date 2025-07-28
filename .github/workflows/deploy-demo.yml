@@ -43,9 +43,6 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build packages
-        run: bun run build
-
       - name: Build demo app
         run: bun run build --filter=@meta-sql/demo
         env:
