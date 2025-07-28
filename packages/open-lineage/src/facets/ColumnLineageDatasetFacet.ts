@@ -9,7 +9,7 @@
  * @see https://openlineage.io/docs/spec/facets/dataset-facets/column_lineage_facet/
  */
 
-import { DatasetFacet } from "../events.js";
+import { type DatasetFacet } from "../events.js";
 
 /**
  * Transformation type indicating how direct the relationship is between input and output

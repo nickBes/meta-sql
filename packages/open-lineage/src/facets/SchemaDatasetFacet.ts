@@ -9,7 +9,7 @@
  * @see https://openlineage.io/spec/facets/1-1-1/SchemaDatasetFacet.json
  */
 
-import { DatasetFacet } from "../events.js";
+import { type DatasetFacet } from "../events.js";
 
 /**
  * Schema field definition with support for nested fields
