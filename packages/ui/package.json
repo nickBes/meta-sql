@@ -30,9 +30,13 @@
     "typescript": "5.8.2"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "lucide-react": "^0.468.0",
     "tailwind-merge": "^2.5.4"
   },

@@ -26,7 +26,6 @@
   "devDependencies": {
     "@meta-sql/eslint-config": "workspace:*",
     "@meta-sql/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3",
     "eslint": "^9.30.0",
     "tsup": "^8.0.2",
     "typescript": "5.8.2"
