@@ -1,13 +1,19 @@
 import type { Node, Edge } from "@xyflow/react";
 import { MarkerType } from "@xyflow/react";
 import type { Schema } from "@meta-sql/lineage";
-import type { LineageResult, TableNodeData, TableData } from "./types";
+import type { LineageResult, TableNodeData, ColumnData } from "./types";
 import type { Transformation } from "@meta-sql/open-lineage";
 import { getEdgeStyle } from "./edgeUtils";
 
 interface ParsedLineageData {
   nodes: Node<TableNodeData>[];
   edges: Edge[];
+}
+
+interface TableData {
+  columns: Map<string, Omit<ColumnData, "name">>;
+  isSource: boolean;
+  isTarget: boolean;
 }
 
 export const parseLineageData = (
@@ -34,7 +40,6 @@ export const parseLineageData = (
             columnName,
             {
               type: "source",
-              dataType: "VARCHAR", // Default type since Schema doesn't include types
             },
           ])
         ),
@@ -56,7 +61,6 @@ export const parseLineageData = (
         ([colName, colData]) => ({
           name: colName,
           type: colData.type,
-          dataType: colData.dataType,
           transformation: colData.transformation,
         })
       );
@@ -135,9 +139,6 @@ export const parseLineageData = (
     }
 
     if (existingTargetCol) {
-      if (existingTargetCol.type === "source") {
-        existingTargetCol.type = "both";
-      }
       // Update transformation info if we have new information
       if (transformationInfo) {
         existingTargetCol.transformation = transformationInfo;
@@ -177,12 +178,7 @@ export const parseLineageData = (
         // Update source column status (mark as used in lineage)
         const existingSourceCol = sourceTableData.columns.get(sourceCol);
         if (existingSourceCol) {
-          if (existingSourceCol.type === "target") {
-            existingSourceCol.type = "both";
-          } else if (existingSourceCol.type === "source") {
-            // Keep as source, but this indicates it's now used in lineage
-            existingSourceCol.type = "source";
-          }
+          // Keep existing type, column is already processed
         } else {
           // This shouldn't happen if schema was loaded first, but handle it
           sourceTableData.columns.set(sourceCol, { type: "source" });
@@ -277,7 +273,6 @@ export const parseLineageData = (
       ([colName, colData]) => ({
         name: colName,
         type: colData.type,
-        dataType: colData.dataType,
         transformation: colData.transformation,
       })
     );
@@ -289,7 +284,7 @@ export const parseLineageData = (
       return a.name.localeCompare(b.name);
     });
 
-    let nodeType: "source" | "target" | "mixed";
+    let nodeType: "source" | "target";
     let xPosition: number;
     let yPosition: number;
 
@@ -297,11 +292,11 @@ export const parseLineageData = (
     const spacing = Math.max(tableVerticalSpacing, tableHeight + 80); // Extra padding
 
     if (tableData.isSource && tableData.isTarget) {
-      nodeType = "mixed";
-      xPosition = (sourceX + targetX) / 2; // Middle position
-      yPosition = Math.max(currentSourceY, currentTargetY); // Use max to avoid overlap
-      currentSourceY = yPosition + spacing;
-      currentTargetY = yPosition + spacing;
+      // Table is both source and target, treat as target for positioning
+      nodeType = "target";
+      xPosition = targetX;
+      yPosition = currentTargetY;
+      currentTargetY += spacing;
     } else if (tableData.isSource) {
       nodeType = "source";
       xPosition = sourceX;

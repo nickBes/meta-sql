@@ -53,7 +53,7 @@ const dialectOptions = [
     value: "transactsql" as const,
     label: "SQL Server",
   },
-];
+] satisfies Array<{ value: SupportedDialect; label: string }>;
 
 interface SQLEditorProps {
   onQueryParsed: (
@@ -86,6 +86,8 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
         const ast = parser.astify(query, { database: dialect });
         const firstStatement = Array.isArray(ast) ? ast[0] : ast;
 
+        console.log(firstStatement);
+
         if (firstStatement) {
           // Check if it's a SELECT statement
           if (firstStatement && firstStatement.type === "select") {
@@ -97,6 +99,8 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
 
             // Get column lineage and update the graph
             const lineageResult = getLineage(firstStatement, lineageSchema);
+            console.log(lineageResult);
+
             onQueryParsed(lineageResult, query, dialect);
 
             setValidationResult({ isValid: true, errors: [] });
@@ -115,6 +119,8 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
           });
         }
       } catch (error) {
+        console.error(error);
+
         setValidationResult({
           isValid: false,
           errors: [
@@ -134,8 +140,6 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
   const handleLoadSample = () => {
     setQuery(sampleQueries[dialect]);
   };
-
-  console.log(validationResult?.errors);
 
   return (
     <div className={`h-full ${className}`}>

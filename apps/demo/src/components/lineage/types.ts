@@ -11,25 +11,14 @@ export interface LineageGraphProps {
   className?: string;
 }
 
-export interface TableNodeData extends Record<string, unknown> {
-  tableName: string;
-  columns: {
-    name: string;
-    type: "source" | "target" | "both" | "unused";
-    dataType?: string;
-    transformation?: Transformation;
-  }[];
-  type: "source" | "target" | "mixed";
-}
-
 export interface ColumnData {
-  type: "source" | "target" | "both" | "unused";
-  dataType?: string;
+  name: string;
+  type: "source" | "target" | "unused";
   transformation?: Transformation;
 }
 
-export interface TableData {
-  columns: Map<string, ColumnData>;
-  isSource: boolean;
-  isTarget: boolean;
+export interface TableNodeData extends Record<string, unknown> {
+  tableName: string;
+  columns: ColumnData[];
+  type: "source" | "target";
 }

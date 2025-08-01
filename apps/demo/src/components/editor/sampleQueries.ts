@@ -13,18 +13,46 @@ FROM user_profiles up
 WHERE up.state IN ('CA', 'NY', 'TX')
 ORDER BY age DESC;`,
 
-  postgresql: `-- Product sales analysis with store information
+  postgresql: `-- Product sales analysis with store information using CTEs
+WITH filtered_sales AS (
+    SELECT 
+        product_id,
+        store_id,
+        quantity_sold,
+        unit_price,
+        discount_percentage
+    FROM product_sales 
+    WHERE sale_date >= '2023-01-01'
+),
+store_sales_summary AS (
+    SELECT 
+        fs.product_id,
+        fs.store_id,
+        SUM(fs.quantity_sold) as total_quantity,
+        AVG(fs.unit_price) as avg_price,
+        SUM(fs.quantity_sold * fs.unit_price * (1 - fs.discount_percentage/100)) as net_revenue
+    FROM filtered_sales fs
+    GROUP BY fs.product_id, fs.store_id
+),
+final_report AS (
+    SELECT 
+        sss.product_id,
+        s.store_name,
+        s.region,
+        sss.total_quantity,
+        sss.avg_price,
+        sss.net_revenue
+    FROM store_sales_summary sss
+    JOIN stores s ON sss.store_id = s.id
+)
 SELECT 
-    ps.product_id,
-    s.store_name,
-    s.region,
-    SUM(ps.quantity_sold) as total_quantity,
-    AVG(ps.unit_price) as avg_price,
-    SUM(ps.quantity_sold * ps.unit_price * (1 - ps.discount_percentage/100)) as net_revenue
-FROM product_sales ps
-JOIN stores s ON ps.store_id = s.id
-WHERE ps.sale_date >= '2023-01-01'
-GROUP BY ps.product_id, s.store_name, s.region
+    product_id,
+    store_name,
+    region,
+    total_quantity,
+    avg_price,
+    net_revenue
+FROM final_report
 ORDER BY net_revenue DESC;`,
 
   bigquery: `-- Regional sales performance
@@ -34,8 +62,8 @@ SELECT
     SUM(ps.quantity_sold) as total_units_sold,
     AVG(ps.unit_price) as avg_unit_price,
     SUM(ps.quantity_sold * ps.unit_price) as gross_revenue
-FROM \`project.dataset.product_sales\` ps
-JOIN \`project.dataset.stores\` s ON ps.store_id = s.id
+FROM \`product_sales\` ps
+JOIN \`stores\` s ON ps.store_id = s.id
 GROUP BY s.region
 ORDER BY gross_revenue DESC;`,
 
