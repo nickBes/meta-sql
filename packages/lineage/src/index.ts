@@ -1,7 +1,7 @@
 import {
-  ColumnLineageDatasetFacet,
-  InputField,
-  Transformation,
+  type ColumnLineageDatasetFacet,
+  type InputField,
+  type Transformation as _Transformation,
 } from "@meta-sql/open-lineage";
 import {
   Select,
@@ -12,25 +12,73 @@ import {
   ExpressionValue,
   AggrFunc,
   Function as AstFunction,
+  With,
 } from "node-sql-parser";
 import { HashSet } from "./hashset";
 
+type Transformation = Exclude<_Transformation, "masking"> & {
+  masking: boolean;
+};
+
 const MASKING_AGG_FUNCTIONS = new Set(["COUNT"]);
 
-const DIRECT_TRANSFORMATION: Transformation = {
+const MASKING_FUNCTIONS = new Set([
+  "MD5",
+  "SHA1",
+  "SHA2",
+  "SHA256",
+  "SHA512",
+  "MURMUR3",
+  "SPOOKY_HASH_V2_32",
+  "SPOOKY_HASH_V2_64",
+]);
+
+export const DIRECT_TRANSFORMATION: Transformation = {
   type: "DIRECT",
   subtype: "TRANSFORMATION",
+  masking: false,
 };
 
-const DIRECT_IDENTITY: Transformation = {
+export const DIRECT_IDENTITY: Transformation = {
   type: "DIRECT",
   subtype: "IDENTITY",
+  masking: false,
 };
 
-const DIRECT_AGGREGATION: Transformation = {
+export const DIRECT_AGGREGATION: Transformation = {
   type: "DIRECT",
   subtype: "AGGREGATION",
+  masking: false,
 };
+
+function mergeTransformations(
+  parent: Transformation | undefined,
+  child: Transformation
+): Transformation {
+  if (!parent) {
+    return child;
+  }
+
+  if (child.type !== "DIRECT" || parent.type !== "DIRECT") {
+    throw new Error("Indirect transformations not supported yet");
+  }
+
+  let leading: Transformation;
+
+  // agg > transformation > identity
+
+  if (parent.subtype === "AGGREGATION") {
+    leading = parent;
+  } else if (child.subtype === "AGGREGATION") {
+    leading = child;
+  } else if (parent.subtype === "TRANSFORMATION") {
+    leading = parent;
+  } else {
+    leading = child;
+  }
+
+  return { ...leading, masking: parent.masking || child.masking };
+}
 
 class TransformationSet extends HashSet<Transformation> {
   constructor(values?: readonly Transformation[]) {
@@ -115,7 +163,7 @@ export function getOutputColumnName(column: AstColumn): string | null {
 
 export function getDirectTransformationsFromExprValue(
   expr: ExpressionValue,
-  override?: Transformation
+  parentTransformation?: Transformation
 ): Record<string, TransformationSet> {
   switch (expr.type) {
     case "column_ref": {
@@ -124,7 +172,7 @@ export function getDirectTransformationsFromExprValue(
       return inputColumnName
         ? {
             [inputColumnName]: new TransformationSet([
-              override ?? DIRECT_IDENTITY,
+              parentTransformation ?? DIRECT_IDENTITY,
             ]),
           }
         : {};
@@ -137,7 +185,7 @@ export function getDirectTransformationsFromExprValue(
       Object.entries(
         getDirectTransformationsFromExprValue(
           left,
-          override ?? DIRECT_TRANSFORMATION
+          mergeTransformations(parentTransformation, DIRECT_TRANSFORMATION)
         )
       ).forEach(([key, value]) => {
         merged[key] = value;
@@ -146,7 +194,7 @@ export function getDirectTransformationsFromExprValue(
       Object.entries(
         getDirectTransformationsFromExprValue(
           right,
-          override ?? DIRECT_TRANSFORMATION
+          mergeTransformations(parentTransformation, DIRECT_TRANSFORMATION)
         )
       ).forEach(([key, value]) => {
         const prev = merged[key];
@@ -165,10 +213,10 @@ export function getDirectTransformationsFromExprValue(
 
       return getDirectTransformationsFromExprValue(
         aggExpr.args.expr,
-        override ?? {
+        mergeTransformations(parentTransformation, {
           ...DIRECT_AGGREGATION,
           masking: MASKING_AGG_FUNCTIONS.has(aggExpr.name),
-        }
+        })
       );
     }
     case "function": {
@@ -179,7 +227,12 @@ export function getDirectTransformationsFromExprValue(
           (acc, arg) => {
             const argTransformations = getDirectTransformationsFromExprValue(
               arg,
-              override ?? DIRECT_TRANSFORMATION
+              mergeTransformations(parentTransformation, {
+                ...DIRECT_TRANSFORMATION,
+                masking:
+                  funcExpr.name.name.length > 0 &&
+                  MASKING_FUNCTIONS.has(funcExpr.name.name.at(-1)!.value),
+              })
             );
 
             Object.entries(argTransformations).forEach(([key, value]) => {
@@ -204,21 +257,42 @@ export function getTableExpressionsFromSelect(select: Select): {
   const regularTables: BaseFrom[] = [];
   const selectTables: SelectWithAlias[] = [];
 
+  const previousWiths: With[] = [];
+  const withByNames: Map<string, SelectWithAlias> = new Map();
+
+  if (select.with) {
+    select.with.forEach((withItem) => {
+      const s = withItem.stmt.ast ?? withItem.stmt;
+
+      withByNames.set(withItem.name.value, {
+        ...s,
+        as: withItem.name.value,
+        with: [...previousWiths],
+      });
+
+      previousWiths.push(withItem);
+    });
+  }
+
   if (select.from) {
     const fromItems = Array.isArray(select.from) ? select.from : [select.from];
 
     fromItems.forEach((item) => {
       if ("table" in item) {
-        regularTables.push(item);
+        // might mention with statemnt in our select
+        const matchingWith = withByNames.get(item.table);
+
+        if (matchingWith) {
+          selectTables.push({
+            ...matchingWith,
+            as: item.as ?? matchingWith.as,
+          });
+        } else {
+          regularTables.push(item);
+        }
       } else if ("expr" in item) {
         selectTables.push({ ...item.expr.ast, as: item.as });
       }
-    });
-  }
-
-  if (select.with) {
-    select.with.forEach((withItem) => {
-      selectTables.push({ ...withItem.stmt.ast, as: withItem.name.value });
     });
   }
 
