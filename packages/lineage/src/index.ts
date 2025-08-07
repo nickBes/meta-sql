@@ -17,7 +17,7 @@ import {
 import { HashSet } from "./hashset";
 
 type Transformation = Exclude<_Transformation, "masking"> & {
-  masking: boolean;
+  masking: boolean; // output boolean only for easier testing
 };
 
 const MASKING_AGG_FUNCTIONS = new Set(["COUNT"]);
@@ -172,7 +172,7 @@ export function getDirectTransformationsFromExprValue(
       return inputColumnName
         ? {
             [inputColumnName]: new TransformationSet([
-              parentTransformation ?? DIRECT_IDENTITY,
+              mergeTransformations(parentTransformation, DIRECT_IDENTITY),
             ]),
           }
         : {};
@@ -267,7 +267,7 @@ export function getTableExpressionsFromSelect(select: Select): {
       withByNames.set(withItem.name.value, {
         ...s,
         as: withItem.name.value,
-        with: [...previousWiths],
+        with: [...previousWiths], // keep previous with statements
       });
 
       previousWiths.push(withItem);
@@ -291,7 +291,11 @@ export function getTableExpressionsFromSelect(select: Select): {
           regularTables.push(item);
         }
       } else if ("expr" in item) {
-        selectTables.push({ ...item.expr.ast, as: item.as });
+        selectTables.push({
+          ...item.expr.ast,
+          as: item.as,
+          with: previousWiths, // propagate previous withs
+        });
       }
     });
   }
@@ -299,14 +303,44 @@ export function getTableExpressionsFromSelect(select: Select): {
   return { regularTables, selectTables };
 }
 
+export function mergeTransformationSet(
+  parent: TransformationSet,
+  child: TransformationSet
+): TransformationSet {
+  const merged = new TransformationSet();
+
+  parent.forEach((tp) => {
+    child.forEach((tc) => {
+      merged.add(mergeTransformations(tp, tc));
+    });
+  });
+
+  return merged;
+}
+
 export function getColumnLineage(
   select: Select,
   schema: Schema,
-  column: AstColumn
+  column: AstColumn,
+  transformations?: TransformationSet
 ): InputField[] {
-  const transformationsByColumns = getDirectTransformationsFromExprValue(
+  let transformationsByColumns = getDirectTransformationsFromExprValue(
     column.expr
   );
+
+  if (transformations) {
+    transformationsByColumns = Object.entries(transformationsByColumns).reduce(
+      (acc, [columnName, childTransformations]) => {
+        acc[columnName] = mergeTransformationSet(
+          transformations,
+          childTransformations
+        );
+
+        return acc;
+      },
+      {} as Record<string, TransformationSet>
+    );
+  }
 
   const { regularTables, selectTables } = getTableExpressionsFromSelect(select);
 
@@ -345,16 +379,24 @@ export function getColumnLineage(
           (c) => getOutputColumnName(c) === inputColumn.name
         );
 
-        const nextColumn = matchingColumn ?? column;
+        let nextColumn: AstColumn;
 
-        // stop propogating table of column as it is only in the context of the select
-        if (nextColumn.expr.type === "column_ref") {
-          const expr = nextColumn.expr as ColumnRefItem;
+        if (matchingColumn) {
+          nextColumn = matchingColumn;
+        } else {
+          nextColumn = column;
 
-          expr.table = null;
+          // stop propogating table of column as it is only in the context of the select
+          if (nextColumn.expr.type === "column_ref") {
+            const expr = nextColumn.expr as ColumnRefItem;
+
+            expr.table = null;
+          }
         }
 
-        inputFields.push(...getColumnLineage(selectTable, schema, nextColumn));
+        inputFields.push(
+          ...getColumnLineage(selectTable, schema, nextColumn, transformations)
+        );
       }
     }
   }

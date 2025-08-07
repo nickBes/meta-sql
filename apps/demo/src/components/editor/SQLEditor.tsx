@@ -221,7 +221,7 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
       </div>
 
       <div className="flex-1">
-        <div className="h-96">
+        <div className="h-[65vh]">
           <Editor
             height="100%"
             defaultLanguage="sql"
