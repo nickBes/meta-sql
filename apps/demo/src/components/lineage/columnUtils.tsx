@@ -82,18 +82,3 @@ export const getColumnIcon = ({
       return <HelpCircle className="h-3 w-3 text-foreground" />;
   }
 };
-
-export const getColumnStyle = (columnType: string): string => {
-  switch (columnType) {
-    case "source":
-      return "bg-background text-foreground";
-    case "target":
-      return "bg-background text-foreground";
-    case "both":
-      return "bg-background text-foreground";
-    case "unused":
-      return "bg-background text-foreground opacity-50";
-    default:
-      return "bg-background text-foreground";
-  }
-};

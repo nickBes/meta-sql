@@ -277,13 +277,6 @@ export const parseLineageData = (
       })
     );
 
-    // Sort columns: used columns first, then unused
-    columns.sort((a, b) => {
-      if (a.type === "unused" && b.type !== "unused") return 1;
-      if (a.type !== "unused" && b.type === "unused") return -1;
-      return a.name.localeCompare(b.name);
-    });
-
     let nodeType: "source" | "target";
     let xPosition: number;
     let yPosition: number;

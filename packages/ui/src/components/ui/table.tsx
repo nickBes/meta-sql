@@ -4,7 +4,7 @@ import { cn } from "@meta-sql/ui/lib";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="relative w-full overflow-auto">
+    <div className="relative w-full">
       <table
         data-slot="table"
         className={cn(

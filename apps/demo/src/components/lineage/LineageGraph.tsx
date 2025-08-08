@@ -57,10 +57,6 @@ export const LineageGraph: React.FC<LineageGraphWithSchemaProps> = ({
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        connectionMode={ConnectionMode.Loose}
-        nodesDraggable={true}
-        nodesConnectable={true}
-        elementsSelectable={true}
         fitView
         fitViewOptions={{
           padding: 0.2,
