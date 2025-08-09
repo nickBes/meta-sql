@@ -16,9 +16,10 @@ import {
   GitBranch,
 } from "lucide-react";
 import type { Transformation } from "@meta-sql/open-lineage";
+import type { ColumnType } from "./types";
 
 interface ColumnIconProps {
-  type: string;
+  type: ColumnType;
   transformation?: Transformation;
 }
 
@@ -27,7 +28,7 @@ export const getColumnIcon = ({
   transformation,
 }: ColumnIconProps): React.ReactElement => {
   // For target columns, show icon based on transformation
-  if (type === "target" || type === "both") {
+  if (type === "target") {
     // Handle specific subtypes
     if (transformation?.subtype) {
       switch (transformation.subtype) {
@@ -74,8 +75,6 @@ export const getColumnIcon = ({
   switch (type) {
     case "source":
       return <Database className="h-3 w-3 text-foreground" />;
-    case "both":
-      return <GitBranch className="h-3 w-3 text-foreground" />;
     case "unused":
       return <Circle className="h-3 w-3 text-foreground" />;
     default:

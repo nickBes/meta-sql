@@ -8,8 +8,7 @@ export interface EdgeStyle {
 }
 
 export const getEdgeStyle = (
-  transformation: Transformation | undefined,
-  animated: boolean = true
+  transformation: Transformation | undefined
 ): EdgeStyle => {
   const type = transformation?.type || "DIRECT";
   const isIndirect = type === "INDIRECT";
@@ -19,11 +18,13 @@ export const getEdgeStyle = (
   const color = "var(--foreground)"; // Black/dark in light mode, white/light in dark mode
   let strokeDasharray = "0"; // Solid line by default
   const strokeWidth = 2; // Same width for all edges
-  let shouldAnimate = false;
+
+  let isAnimated = false;
 
   // Apply dasharray only for indirect transformations or masked data
   if (isIndirect || isMasked) {
-    shouldAnimate = animated; // Only animate dashed edges
+    isAnimated = true;
+
     if (isIndirect && isMasked) {
       strokeDasharray = "16,8,4,8"; // Complex pattern for both indirect and masked
     } else if (isIndirect) {
@@ -33,10 +34,10 @@ export const getEdgeStyle = (
     }
   }
 
-  return { 
-    color, 
-    strokeDasharray, 
+  return {
+    color,
+    strokeDasharray,
     strokeWidth,
-    animated: shouldAnimate
+    animated: isAnimated,
   };
 };

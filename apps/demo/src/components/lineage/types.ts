@@ -11,14 +11,18 @@ export interface LineageGraphProps {
   className?: string;
 }
 
+export type ColumnType = "source" | "target" | "unused";
+
 export interface ColumnData {
   name: string;
-  type: "source" | "target" | "unused";
+  type: ColumnType;
   transformation?: Transformation;
 }
+
+export type TableType = "source" | "target";
 
 export interface TableNodeData extends Record<string, unknown> {
   tableName: string;
   columns: ColumnData[];
-  type: "source" | "target";
+  type: TableType;
 }

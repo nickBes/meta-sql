@@ -33,43 +33,30 @@ export const TableNode: React.FC<{ data: TableNodeData }> = ({ data }) => {
           >
             <TableCell className="relative">
               {/* Individual column handles */}
-              {column.type === "source" && data.type === "source" && (
-                <Handle
-                  type="source"
-                  position={Position.Right}
-                  id={`source-${column.name}`}
-                  style={{
-                    right: -6,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "var(--foreground)",
-                    width: 8,
-                    height: 8,
-                    border: "1px solid var(--background)",
-                    zIndex: 10,
-                    position: "absolute",
-                  }}
-                />
-              )}
-
-              {column.type === "target" && data.type === "target" && (
-                <Handle
-                  type="target"
-                  position={Position.Left}
-                  id={`target-${column.name}`}
-                  style={{
-                    position: "absolute",
-                    left: -6,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "var(--background)",
-                    width: 8,
-                    height: 8,
-                    border: "1px solid var(--foreground)",
-                    zIndex: 10,
-                  }}
-                />
-              )}
+              <Handle
+                type={column.type === "unused" ? "source" : column.type}
+                position={
+                  column.type !== "target" ? Position.Right : Position.Left
+                }
+                id={`${data.tableName}.${column.name}`}
+                style={{
+                  [column.type !== "target" ? "right" : "left"]: -6,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background:
+                    column.type !== "target"
+                      ? "var(--foreground)"
+                      : "var(--background)",
+                  width: 8,
+                  height: 8,
+                  border:
+                    column.type !== "target"
+                      ? "1px solid var(--background)"
+                      : "1px solid var(--foreground)",
+                  zIndex: 10,
+                  position: "absolute",
+                }}
+              />
 
               <span className="flex items-center gap-2">
                 {getColumnIcon({

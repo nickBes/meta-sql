@@ -86,8 +86,6 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
         const ast = parser.astify(query, { database: dialect });
         const firstStatement = Array.isArray(ast) ? ast[0] : ast;
 
-        console.log(firstStatement);
-
         if (firstStatement) {
           // Check if it's a SELECT statement
           if (firstStatement && firstStatement.type === "select") {
@@ -99,7 +97,6 @@ export const SQLEditor: React.FC<SQLEditorProps> = ({
 
             // Get column lineage and update the graph
             const lineageResult = getLineage(firstStatement, lineageSchema);
-            console.log(lineageResult);
 
             onQueryParsed(lineageResult, query, dialect);
 

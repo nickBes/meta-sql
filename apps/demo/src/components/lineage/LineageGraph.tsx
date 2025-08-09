@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import {
   ReactFlow,
-  ConnectionMode,
   Background,
   BackgroundVariant,
 } from "@xyflow/react";
@@ -28,12 +27,11 @@ interface LineageGraphWithSchemaProps extends LineageGraphProps {
 export const LineageGraph: React.FC<LineageGraphWithSchemaProps> = ({
   lineageData,
   schema,
-  animateEdges = true,
   className = "",
 }) => {
   const { nodes, edges } = useMemo(() => {
-    return parseLineageData(lineageData, schema, animateEdges);
-  }, [lineageData, schema, animateEdges]);
+    return parseLineageData(lineageData, schema);
+  }, [lineageData, schema]);
 
   return (
     <div className={`h-full ${className}`}>
