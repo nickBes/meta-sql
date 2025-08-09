@@ -2,6 +2,8 @@
 
 A TypeScript library for extracting column-level lineage from SQL queries, implementing the [OpenLineage Column Lineage Dataset Facet specification](https://openlineage.io/docs/spec/facets/dataset-facets/column_lineage_facet/).
 
+> ⚠️ **Experimental**: This library is currently in active development and may undergo significant changes. APIs, interfaces, and functionality may change without notice in future versions. Use with caution in production environments.
+
 ## Overview
 
 This library analyzes SQL SELECT statements to generate detailed column-level lineage information, tracking how data flows from input columns to output columns through various transformations like joins, aggregations, filters, and CTEs (Common Table Expressions).
@@ -82,9 +84,9 @@ Our development roadmap aligns with the OpenLineage Column Lineage Dataset Facet
   - ✅ Date functions (`SELECT DATE_ADD(created_at, INTERVAL 1 DAY)`)
 - ✅ **DIRECT/AGGREGATION** support for aggregation functions
   - ✅ Basic aggregations (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`)
-- [ ] **Masking detection** for privacy-preserving transformations
-  - Hash functions (`SELECT MD5(email)`)
-  - Anonymization functions (`SELECT ANONYMIZE(ssn)`)
+- ✅ **Masking detection** for privacy-preserving transformations
+  - ✅ Hash functions (`SELECT MD5(email)`)
+  - ✅ Anonymization functions (`SELECT ANONYMIZE(ssn)`)
 
 ### 🔄 Phase 2: Indirect Lineage
 
@@ -109,7 +111,7 @@ Our development roadmap aligns with the OpenLineage Column Lineage Dataset Facet
 
 - [ ] **Dataset-level lineage** for operations affecting entire datasets
 - [ ] **Multi-statement support** (DDL operations)
-- [ ] **Multiple SQL dialect support** (PostgreSQL, MySQL, BigQuery, Snowflake)
+- ✅ **Multiple SQL dialect support** (PostgreSQL, MySQL, BigQuery, Snowflake)
 
 ## API Reference
 

@@ -2,6 +2,11 @@
   "name": "@meta-sql/lineage",
   "version": "0.0.1",
   "description": "Library for processing lineage from SQL",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nickBes/meta-sql.git",
+    "directory": "packages/lineage"
+  },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
