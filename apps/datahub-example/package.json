@@ -1,6 +1,6 @@
 {
   "name": "@meta-sql/datahub-example",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Example application demonstrating DataHub OpenLineage integration with meta-sql packages",
   "private": true,
   "type": "module",

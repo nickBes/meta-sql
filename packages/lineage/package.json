@@ -1,6 +1,6 @@
 {
   "name": "@meta-sql/lineage",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Library for processing lineage from SQL",
   "repository": {
     "type": "git",
@@ -36,7 +36,7 @@
     "typescript": "5.8.2"
   },
   "dependencies": {
-    "@meta-sql/open-lineage": "workspace:*"
+    "@meta-sql/open-lineage": "0.1.0"
   },
   "keywords": [
     "sql",
